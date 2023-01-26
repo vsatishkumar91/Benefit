@@ -8,15 +8,22 @@ namespace Benefit.DataAccessLayer
 {
 	public class BenefitRepository : BaseService, IBenefitRepository
 	{
-		#region CRUD
-		/// <summary>
-		/// Creates a new record for Benefit
-		/// </summary>
-		/// <param name="BenefitModel">BenefitModel object as params</param>
-		/// <returns>Returns id of the Benefit</returns>
-		public int Create(BenefitModel BenefitModel)
+		private string connectionString;
+
+		public BenefitRepository(string connectionString)
+        {
+            this.connectionString = connectionString;
+        }
+
+        #region CRUD
+        /// <summary>
+        /// Creates a new record for Benefit
+        /// </summary>
+        /// <param name="BenefitModel">BenefitModel object as params</param>
+        /// <returns>Returns id of the Benefit</returns>
+        public int Create(BenefitModel BenefitModel)
 		{
-			SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+			SqlConnection sqlConnection = new SqlConnection(connectionString);
 
 			SqlCommand command = new SqlCommand();
 			command.Connection = sqlConnection;
@@ -35,7 +42,7 @@ namespace Benefit.DataAccessLayer
 		public List<BenefitModel> GetAll()
 		{
 			List<BenefitModel> empList = new List<BenefitModel>();
-			SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+			SqlConnection sqlConnection = new SqlConnection(connectionString);
 
 			SqlCommand command = new SqlCommand();
 			command.Connection = sqlConnection;
@@ -67,7 +74,7 @@ namespace Benefit.DataAccessLayer
 		/// <returns>Returns int if successfully updated</returns>
 		public int Update(BenefitModel BenefitModel)
 		{
-			SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+			SqlConnection sqlConnection = new SqlConnection(connectionString);
 
 			SqlCommand command = new SqlCommand();
 			command.CommandText = string.Format("update Benefit set name='{0}', age={1} where id={2};", BenefitModel.Name, BenefitModel.Age, BenefitModel.Id);
@@ -86,7 +93,7 @@ namespace Benefit.DataAccessLayer
 		/// <returns></returns>
 		public int Delete(int id)
 		{
-			SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+			SqlConnection sqlConnection = new SqlConnection(connectionString);
 
 			SqlCommand command = new SqlCommand();
 			command.CommandText = string.Format("delete from Benefit where id={0};", id);
@@ -107,7 +114,7 @@ namespace Benefit.DataAccessLayer
 		/// <returns>Returns Benefit details</returns>
 		public BenefitModel GetBenefit(int id)
 		{
-			SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+			SqlConnection sqlConnection = new SqlConnection(connectionString);
 			SqlCommand command = new SqlCommand();
 			command.Connection = sqlConnection;
 			command.CommandText = "select id,name,age from Benefit where id=@id;";

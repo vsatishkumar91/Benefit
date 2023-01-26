@@ -8,24 +8,6 @@ namespace Benefit.DataAccessLayer
 {
     public  class BaseService
     {
-		private string _connectionString;
-
-		public string ConnectionString
-		{
-			get
-			{
-				if (_connectionString == null)
-				{
-					_connectionString = ConfigurationManagerHelper.GetConnectionString1();
-					return _connectionString;
-				}
-				else
-				{
-					return _connectionString;
-				}
-			}
-		}
-
 		#region DB operations
 		/// <summary>
 		/// Returns a friendly string. If obj is DBNull or null, it returns an empty string.
