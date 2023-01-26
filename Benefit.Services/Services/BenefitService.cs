@@ -1,10 +1,18 @@
-﻿using Benefit.Services.Interfaces;
+﻿using Benefit.DataAccessLayer;
+using Benefit.Services.Interfaces;
 using Benefits.Models;
 
 namespace Benefit.Services.Services
 {
     public class BenefitService : IBenefitService
     {
+        public readonly IBenefitRepository _benefitRepository;
+
+        public BenefitService(IBenefitRepository benefitRepository)
+        {
+            _benefitRepository = benefitRepository;
+        }
+
         static List<BenefitModel> list = new List<BenefitModel>()
         {
             new BenefitModel() { Name = "test1", Id = 1 },
@@ -16,12 +24,12 @@ namespace Benefit.Services.Services
 
         public int CreateBenefit(BenefitModel model)
         {
-            throw new NotImplementedException();
+            return _benefitRepository.Create(model);
         }
 
         public void DeleteBenefitById(int id)
         {
-            throw new NotImplementedException();
+            _benefitRepository.Delete(id);
         }
 
         public List<BenefitModel> GetAllBenefits()
@@ -31,7 +39,7 @@ namespace Benefit.Services.Services
 
         public BenefitModel GetBenefitById(int id)
         {
-            throw new NotImplementedException();
+            return _benefitRepository.GetBenefit(id);
         }
 
         public BenefitModel GetBenefitByName(string name)
@@ -41,7 +49,7 @@ namespace Benefit.Services.Services
 
         public void UpdateBenefit(BenefitModel model)
         {
-            throw new NotImplementedException();
+            _benefitRepository.Update(model);
         }
     }
 }

@@ -1,3 +1,4 @@
+using Benefit.DataAccessLayer;
 using Benefit.Services.Interfaces;
 using Benefit.Services.Services;
 using Serilog;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IBenefitService, BenefitService>();
+builder.Services.AddTransient<IBenefitRepository, BenefitRepository>();
 
 var app = builder.Build();
 
