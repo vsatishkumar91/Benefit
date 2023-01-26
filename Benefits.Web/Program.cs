@@ -1,8 +1,9 @@
 using Benefit.Services.Interfaces;
 using Benefit.Services.Services;
+using Benefit.Services.Extensions;
+using Benefit.DataAccessLayer;
 using Benefit.DataAccessLayer.Extensions;
 using Serilog;
-using Benefit.Web.Common;
 using Benefits.Web.Configurations;
 
 Log.Logger = new LoggerConfiguration()
@@ -11,14 +12,17 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
-var provider = builder.Services.BuildServiceProvider();
-var configuration = provider.GetService<IConfiguration>();
-var conn = configuration.GetSection(nameof(ConnectionString)).Get<ConnectionString>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var provider = builder.Services.BuildServiceProvider();
+var configuration = provider.GetService<IConfiguration>();
+var conn = configuration.GetSection(nameof(ConnectionString)).Get<ConnectionString>();
 builder.Services.CreateSqlRepository(conn.BenefitConnectionString);
-builder.Services.AddTransient<IBenefitService, BenefitService>();
+provider = builder.Services.BuildServiceProvider();
+var repository = provider.GetService<IBenefitRepository>();
+builder.Services.CreateBenefitService(repository);
 
 var app = builder.Build();
 
