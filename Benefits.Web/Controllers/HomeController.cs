@@ -1,5 +1,6 @@
 ﻿using Benefit.Services.Interfaces;
 using Benefits.Models;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -103,6 +104,38 @@ namespace Benefits.Web.Controllers
             catch
             {
                 return View();
+            }
+        }
+
+        [HttpGet("exporttoexcel")]
+        public async Task<ActionResult> ExportToExcel()
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Benefits");
+                var currentRow = 1;
+                worksheet.Cell(currentRow, 1).Value = "Name";
+                worksheet.Cell(currentRow, 2).Value = "Age";
+
+                var result = _benefitService.GetAllBenefits();
+                
+                foreach (var benefit in result)
+                {
+                    currentRow++;
+                    worksheet.Cell(currentRow, 1).Value = benefit.Name;
+                    worksheet.Cell(currentRow, 2).Value = benefit.Age;
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    return File(
+                        content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "benefits.xlsx");
+                }
             }
         }
     }
