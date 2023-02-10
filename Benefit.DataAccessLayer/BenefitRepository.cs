@@ -1,4 +1,5 @@
-﻿using Benefits.Models;
+﻿using Benefit.Cache;
+using Benefits.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,10 +9,14 @@ namespace Benefit.DataAccessLayer
 {
 	public class BenefitRepository : BaseService, IBenefitRepository
 	{
-		private string connectionString;
+		private readonly string connectionString;
+		private readonly string cacheKey;
+		private readonly ICacheService cacheService;
 
-		public BenefitRepository(string connectionString)
+		public BenefitRepository(ICacheService cacheService, string connectionString)
         {
+			this.cacheService = cacheService;
+			this.cacheKey = "benefit";
             this.connectionString = connectionString;
         }
 
@@ -32,6 +37,7 @@ namespace Benefit.DataAccessLayer
 			sqlConnection.Open();
 			int num = Convert.ToInt32(command.ExecuteScalar());
 			sqlConnection.Close();
+			cacheService.RemoveData(cacheKey);
 			return num;
 		}
 
@@ -41,7 +47,12 @@ namespace Benefit.DataAccessLayer
 		/// <returns>Returns List of BenefitModel</returns>
 		public List<BenefitModel> GetAll()
 		{
-			List<BenefitModel> empList = new List<BenefitModel>();
+			var cacheRespone = cacheService.GetData<List<BenefitModel>>(cacheKey);
+			if(cacheRespone != null)
+            {
+				return cacheRespone;
+            }
+			List<BenefitModel> benefits = new List<BenefitModel>();
 			SqlConnection sqlConnection = new SqlConnection(connectionString);
 
 			SqlCommand command = new SqlCommand();
@@ -56,15 +67,16 @@ namespace Benefit.DataAccessLayer
 
 			foreach (DataRow dr in dt.Rows)
 			{
-				empList.Add(new BenefitModel
+				benefits.Add(new BenefitModel
 				{
 					Id = GetDBInt(dr["id"]),
 					Age = GetDBInt(dr["age"]),
 					Name = GetDBString(dr["name"].ToString())
 				});
 			}
-
-			return empList;
+			var expirationTime = DateTimeOffset.Now.AddMinutes(5);
+			cacheService.SetData(cacheKey, benefits, expirationTime);
+			return benefits;
 		}
 
 		/// <summary>
@@ -83,6 +95,7 @@ namespace Benefit.DataAccessLayer
 			sqlConnection.Open();
 			int update = Convert.ToInt32(command.ExecuteScalar());
 			sqlConnection.Close();
+			cacheService.RemoveData(cacheKey);
 			return update;
 		}
 
@@ -102,6 +115,7 @@ namespace Benefit.DataAccessLayer
 			sqlConnection.Open();
 			int update = Convert.ToInt32(command.ExecuteScalar());
 			sqlConnection.Close();
+			cacheService.RemoveData(cacheKey);
 			return update;
 		}
 		#endregion
@@ -114,6 +128,11 @@ namespace Benefit.DataAccessLayer
 		/// <returns>Returns Benefit details</returns>
 		public BenefitModel GetBenefit(int id)
 		{
+			var cacheRespone = cacheService.GetData<List<BenefitModel>>(cacheKey);
+			if (cacheRespone != null)
+			{
+                return cacheRespone.FirstOrDefault(x => x.Id == id);
+			}
 			SqlConnection sqlConnection = new SqlConnection(connectionString);
 			SqlCommand command = new SqlCommand();
 			command.Connection = sqlConnection;
